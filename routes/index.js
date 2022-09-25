@@ -4,11 +4,12 @@ const { NotFoundError } = require('../errors');
 const moviesRouter = require('./movies-route');
 const usersRouter = require('./users-router');
 const authRouter = require('./auth-router');
-const crashTestRouter = require('./crash-test-router');
 
 const routers = express.Router();
 
-routers.use('/crash-test', crashTestRouter);
+routers.get('/crash-test', () => setTimeout(() => {
+  throw new Error('Сервер сейчас упадёт!');
+}, 0));
 routers.use(authRouter);
 routers.use('/users', auth, usersRouter);
 routers.use('/movies', auth, moviesRouter);
