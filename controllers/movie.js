@@ -8,7 +8,13 @@ const { errorMessage } = require('../utils');
 
 const getMovies = (req, res, next) => {
   Movie.find({})
-    .then((movie) => res.send(movie))
+    .then((films) => {
+      if (films.length === 0) {
+        res.send([]);
+      } else {
+        res.send(films.filter((film) => film.owner.toString() === req.user._id));
+      }
+    })
     .catch(next);
 };
 
