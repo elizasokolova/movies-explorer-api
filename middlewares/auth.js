@@ -1,18 +1,19 @@
 const jwt = require('jsonwebtoken');
 const { UnauthorizedError } = require('../errors');
-const { SECRET_KEY, errorMessage } = require('../utils');
+const {errorMessage} = require('../utils/messages');
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 const auth = (req, res, next) => {
   const { jwt: authorization } = req.cookies;
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  if (!authorization) {
     throw new UnauthorizedError(errorMessage.authorizationError);
   }
 
   let payload;
 
   try {
-    payload = jwt.verify(token, SECRET_KEY);
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'secret-key');
   } catch (error) {
     next(new UnauthorizedError(errorMessage.authorizationError));
   }

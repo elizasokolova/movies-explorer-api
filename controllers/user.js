@@ -7,14 +7,17 @@ const {
   BadRequestError,
   UnauthorizedError,
 } = require('../errors');
-const {
-  SECRET_KEY,
-  errorMessage,
-} = require('../utils');
+const {errorMessage} = require('../utils/messages');
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 const getPersonalData = (req, res, next) => {
   User.findById(req.user._id)
-    .then((user) => res.send({ email: user.email, name: user.name, id: user._id }))
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError();
+      }
+      res.send(user);
+    })
     .catch((error) => next(error));
 };
 
@@ -44,13 +47,14 @@ const createUser = (req, res, next) => {
   bcrypt.hash(password, 10)
     .then((hash) => User.create({ email, name, password: hash }))
     .then((user) => {
-      const { _id } = user;
+      const {_id} = user;
       res.status(201).send({
         _id,
         name,
         email,
       });
-    }).catch((error) => {
+    })
+    .catch((error) => {
       if (error.name === 'ValidationError') {
         next(new BadRequestError(errorMessage.dataNotCorrect));
       } else if (error.code === 11000) {
@@ -64,21 +68,9 @@ const createUser = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  User.findOne({ email }).select('+password')
+  User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new UnauthorizedError(errorMessage.loginNotCorrect);
-      }
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            throw new UnauthorizedError(errorMessage.loginNotCorrect);
-          }
-          return user;
-        });
-    })
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secret-key', { expiresIn: '7d' });
       res
         .cookie('jwt', token, {
           maxAge: 360000 * 24 * 7,
@@ -88,7 +80,9 @@ const login = (req, res, next) => {
         })
         .send({ token });
     })
-    .catch((error) => next(error));
+    .catch(() => {
+      next(new UnauthorizedError());
+    });
 };
 
 const logout = (req, res) => {

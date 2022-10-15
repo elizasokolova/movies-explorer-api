@@ -8,16 +8,15 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const routers = require('./routes');
 const { handleError } = require('./errors');
-const { MONGO_URL } = require('./utils');
 const {
   requestLogger,
   errorLogger,
 } = require('./middlewares/logger');
 
-const { PORT = 3001 } = process.env;
+const { PORT = 3001, DB_CONNECT = 'mongodb://localhost:27017/moviesdb' } = process.env;
 
 const app = express();
-mongoose.connect(MONGO_URL, { useNewUrlParser: true });
+mongoose.connect(DB_CONNECT);
 
 const options = {
   origin: [
@@ -36,7 +35,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(requestLogger);
 
-app.use(routers);
+app.use('/', routers);
 
 app.use(errorLogger);
 app.use(errors());

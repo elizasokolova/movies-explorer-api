@@ -4,7 +4,7 @@ const {
   NotFoundError,
   BadRequestError,
 } = require('../errors');
-const { errorMessage } = require('../utils');
+const { errorMessage } = require('../utils/messages');
 
 const getMovies = (req, res, next) => {
   Movie.find({})
