@@ -43,8 +43,14 @@ const createUser = (req, res, next) => {
   const { email, name, password } = req.body;
   bcrypt.hash(password, 10)
     .then((hash) => User.create({ email, name, password: hash }))
-    .then(() => res.status(201).send({ email, name }))
-    .catch((error) => {
+    .then((user) => {
+      const { _id } = user;
+      res.status(201).send({
+        _id,
+        name,
+        email,
+      });
+    }).catch((error) => {
       if (error.name === 'ValidationError') {
         next(new BadRequestError(errorMessage.dataNotCorrect));
       } else if (error.code === 11000) {
@@ -72,14 +78,27 @@ const login = (req, res, next) => {
         });
     })
     .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        SECRET_KEY,
-        { expiresIn: '7d' },
-      );
-      res.send({ token });
+      const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
+      res
+        .cookie('jwt', token, {
+          maxAge: 360000 * 24 * 7,
+          httpOnly: true,
+          sameSite: 'none',
+          secure: true,
+        })
+        .send({ token });
     })
     .catch((error) => next(error));
+};
+
+const logout = (req, res) => {
+  res.clearCookie('jwt', {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true,
+  })
+    .send({ message: 'Cookie почищены' })
+    .end();
 };
 
 module.exports = {
@@ -87,4 +106,5 @@ module.exports = {
   createUser,
   updateUser,
   login,
+  logout,
 };
