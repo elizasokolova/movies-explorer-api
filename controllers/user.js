@@ -43,9 +43,9 @@ const updateUser = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const { email, name, password } = req.body;
+  const { name, email, password } = req.body;
   bcrypt.hash(password, 10)
-    .then((hash) => User.create({ email, name, password: hash }))
+    .then((hash) => User.create({ name, email, password: hash }))
     .then((user) => {
       const {_id} = user;
       res.status(201).send({
