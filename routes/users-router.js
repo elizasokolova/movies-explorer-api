@@ -3,7 +3,7 @@ const {
   getPersonalData,
   updateUser,
 } = require('../controllers/user');
-const { userUpdateInfoValidation } = require('../middlewares/validation');
+const { userUpdateInfoValidation } = require('../middlewares/validation/user-validation');
 
 const usersRouter = express.Router();
 
