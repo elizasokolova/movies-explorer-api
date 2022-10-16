@@ -11,7 +11,7 @@ const {
 const {
   movieIdValidation,
   movieCreationValidation,
-} = require('../middlewares/validation');
+} = require('../middlewares/validation/movie-validation');
 
 moviesRouter.get('/', getMovies);
 moviesRouter.post('/', movieCreationValidation, createMovie);

@@ -4,9 +4,9 @@ const {errorMessage} = require('../utils/messages');
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const auth = (req, res, next) => {
-  const { jwt: authorization } = req.cookies;
+  const { jwt: token } = req.cookies;
 
-  if (!authorization) {
+  if (!token) {
     throw new UnauthorizedError(errorMessage.authorizationError);
   }
 
