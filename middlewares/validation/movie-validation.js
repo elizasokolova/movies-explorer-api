@@ -3,7 +3,7 @@ const validationURL = require('./validation-url');
 
 const movieIdValidation = celebrate({
   params: Joi.object({
-    id: Joi.string().hex().length(24),
+    movieId: Joi.string().hex().length(24).required(),
   }),
 });
 
