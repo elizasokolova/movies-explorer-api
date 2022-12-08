@@ -7,7 +7,7 @@ const {
 const { errorMessage } = require('../utils/messages');
 
 const getMovies = (req, res, next) => {
-  Movie.find({owner: req.user._id})
+  Movie.find({ owner: req.user._id })
     .then((movies) => res.send(movies))
     // .then((films) => {
     //   if (films.length === 0) {
